@@ -1,0 +1,6 @@
+#!/bin/sh
+#PBS -N TestPingPong
+#PBS -l nodes=2
+#PBS -o /home/sig48/v1/pingpong.out
+#PBS -j oe
+mpirun /home/sig48/v1/pingpong

@@ -1,0 +1,6 @@
+#!/bin/sh
+#PBS -N TestParal
+#PBS -l nodes=4
+#PBS -o /home/sig48/paraltest.out
+#PBS -j oe
+mpirun /home/sig48/v1/hello
