@@ -1,0 +1,5 @@
+#!/bin/sh
+#PBS -N ScatterGather 
+#PBS -l nodes=10
+#PBS -j oe
+mpirun ~/HPC-A/scatter/scatter.o 15
