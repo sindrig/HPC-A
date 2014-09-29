@@ -11,4 +11,4 @@ warmup : warmup/hello.c warmup/pingpong.c
 	mpicc warmup/pingpong.c -o warmup/pingpong.o
 
 clean :
-	rm -rf */*.o
+	rm -rf */*.o */*.o[0-9][0-9][0-9][0-9][0-9]
