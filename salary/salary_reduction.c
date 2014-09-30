@@ -26,7 +26,7 @@ int main (int argc, char *argv[])
                 {
                         nthreads = omp_get_num_threads();
                         accountants = nthreads;
-                        printf("\n%d Accounters were hired to calculate total salary, therefor they are included in the calculations.\n", accountants);
+                        printf("\n%d Accountants were hired to calculate total salary, therefor they are included in the calculations.\n", accountants);
                 }
         }
 
@@ -62,19 +62,3 @@ int main (int argc, char *argv[])
         printf("\nA company has to pay $%f total salary for the current month. The company consists of %d programmers ($%f a month), %d managers ($%f a month), %d ceos ($%f a month) and additionally, %d accountants were hired to calculate the total salary and they charged $%f each for their work.\n\n", totalSalary, programmers, programmerSalary, managers, managerSalary, ceos, ceoSalary, accountants, accounterFee);
 }
 
-/*
- * Example output:
- *
- * [jts7@login-0-2 Lecture4]$ ./salary_reduction.exe
- * Accounter 1 ready to calculate total salary.
- *
- * Accounter 3 ready to calculate total salary.
- *
- * Accounter 0 ready to calculate total salary.
- *
- * 4 Accounters were hired to calculate total salary, therefor they are included in the calculations.
- *
- * Accounter 2 ready to calculate total salary.
- *
- * A company has to pay $69000.000000 total salary for the current month. The company consists of 10 programmers ($4000.000000 a month), 3 managers ($6000.000000 a month), 1 ceos ($9000.000000 a month) and additionally, 4 accountants were hired to calculate the total salary and they charged $500.000000 each for their work.
- * */
