@@ -1,0 +1,63 @@
+
+Accounter 0 ready to calculate total salary.
+
+4 Accountants were hired to calculate total salary, therefor they are included in the calculations.
+
+Accounter 2 ready to calculate total salary.
+
+Accounter 3 ready to calculate total salary.
+
+Accounter 1 ready to calculate total salary.
+
+Accounter 3 calculating in loop 2.
+
+Accounter 1 calculating in loop 2.
+
+Accounter 0 calculating in loop 2.
+
+Accounter 1 calculating in loop 2.
+
+Accounter 0 calculating in loop 2.
+
+Accounter 1 calculating in loop 2.
+
+Accounter 0 calculating in loop 2.
+
+Accounter 2 calculating in loop 2.
+
+Accounter 2 calculating in loop 2.
+
+Accounter 2 calculating in loop 2.
+
+Accounter 2 calculating in loop 3.
+
+Accounter 0 calculating in loop 3.
+
+Accounter 1 calculating in loop 3.
+
+Accounter 0 calculating in loop 4.
+I'm employee #2 and I do exist
+I'm employee #3 and I do exist
+I'm employee #1 and I do exist
+I'm employee #6 and I do exist
+I'm employee #13 and I do exist
+I'm employee #0 and I do exist
+I'm employee #12 and I do exist
+I'm employee #8 and I do exist
+I'm employee #4 and I do exist
+I'm employee #10 and I do exist
+I'm employee #9 and I do exist
+I'm employee #5 and I do exist
+I'm employee #11 and I do exist
+I'm employee #7 and I do exist
+
+Accounter 2 calculating in loop 1.
+
+Accounter 3 calculating in loop 1.
+
+Accounter 1 calculating in loop 1.
+
+Accounter 0 calculating in loop 1.
+
+A company has to pay $69000.000000 total salary for the current month. The company consists of 10 programmers ($4000.000000 a month), 3 managers ($6000.000000 a month), 1 ceos ($9000.000000 a month) and additionally, 4 accountants were hired to calculate the total salary and they charged $500.000000 each for their work.
+
