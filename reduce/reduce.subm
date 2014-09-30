@@ -1,5 +1,5 @@
 #!/bin/sh
-#PBS -N TestPingPong
+#PBS -N TestReduce
 #PBS -l nodes=10
 #PBS -j oe
 mpirun ~/HPC-A/reduce/reduce.o

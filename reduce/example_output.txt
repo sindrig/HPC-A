@@ -1,0 +1,12 @@
+Task 1: I got 12
+Task 0: I got 7
+Task 2: I got 10
+Task 3: I got 1
+Task 8: I got 5
+Task 9: I got 3
+Task 4: I got 13
+Task 5: I got 4
+Task 6: I got 2
+Task 7: I got 7
+All numbers gathered, the sum is 64 and the product is 9172800
+Also, we played a bogus game with your numbers and got the value 2
