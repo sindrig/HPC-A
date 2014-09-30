@@ -17,11 +17,6 @@ int main(int argc, char**argv){
         return 1;
     }
 
-    int arr[n];
-
-    for(i = 0; i < n; i++){
-        arr[i] = i+1;
-    }
 
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -29,7 +24,11 @@ int main(int argc, char**argv){
 
     send_count = (n + (size - 1)) / size;
     
+    int arr[n];
     if(rank == 0){
+        for(i = 0; i < n; i++){
+            arr[i] = i+1;
+        }
         printf("n=%d, send_count=%d, size=%d\n", n, send_count, size); 
     }
 
