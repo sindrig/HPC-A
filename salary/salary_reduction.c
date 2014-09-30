@@ -5,7 +5,7 @@
 
 int main (int argc, char *argv[])
 {
-        int i, nthreads, tid,  programmers, managers, accounters, ceos, num_workers;
+        int i, nthreads, tid,  programmers, managers, accountants, ceos, num_workers;
         float accounterFee, programmerSalary, managerSalary, ceoSalary, totalSalary;
 
         /* Some initializations */
@@ -25,8 +25,8 @@ int main (int argc, char *argv[])
                 if(tid == 0)
                 {
                         nthreads = omp_get_num_threads();
-                        accounters = nthreads;
-                        printf("\n%d Accounters were hired to calculate total salary, therefor they are included in the calculations.\n", accounters);
+                        accountants = nthreads;
+                        printf("\n%d Accounters were hired to calculate total salary, therefor they are included in the calculations.\n", accountants);
                 }
         }
 
@@ -54,12 +54,12 @@ int main (int argc, char *argv[])
         }
         
         #pragma omp parallel for reduction(+:totalSalary)
-        for(i = 0; i < accounters; i++){
+        for(i = 0; i < accountants; i++){
             printf("\nAccounter %d calculating in loop 1.\n", omp_get_thread_num());
             totalSalary = totalSalary + accounterFee;
             }
 
-        printf("\nA company has to pay $%f total salary for the current month. The company consists of %d programmers ($%f a month), %d managers ($%f a month), %d ceos ($%f a month) and additionally, %d accounters were hired to calculate the total salary and they charged $%f each for their work.\n\n", totalSalary, programmers, programmerSalary, managers, managerSalary, ceos, ceoSalary, accounters, accounterFee);
+        printf("\nA company has to pay $%f total salary for the current month. The company consists of %d programmers ($%f a month), %d managers ($%f a month), %d ceos ($%f a month) and additionally, %d accountants were hired to calculate the total salary and they charged $%f each for their work.\n\n", totalSalary, programmers, programmerSalary, managers, managerSalary, ceos, ceoSalary, accountants, accounterFee);
 }
 
 /*
@@ -76,5 +76,5 @@ int main (int argc, char *argv[])
  *
  * Accounter 2 ready to calculate total salary.
  *
- * A company has to pay $69000.000000 total salary for the current month. The company consists of 10 programmers ($4000.000000 a month), 3 managers ($6000.000000 a month), 1 ceos ($9000.000000 a month) and additionally, 4 accounters were hired to calculate the total salary and they charged $500.000000 each for their work.
+ * A company has to pay $69000.000000 total salary for the current month. The company consists of 10 programmers ($4000.000000 a month), 3 managers ($6000.000000 a month), 1 ceos ($9000.000000 a month) and additionally, 4 accountants were hired to calculate the total salary and they charged $500.000000 each for their work.
  * */
