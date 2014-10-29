@@ -1,9 +1,6 @@
 #ifndef __FISH_MODEL__
 #define __FISH_MODEL__
 
-// Create dimensions for our world
-void createDimensions(int* arr, int size);
-
 struct fish_group_s {
     // Number of fish in the group
     int num;

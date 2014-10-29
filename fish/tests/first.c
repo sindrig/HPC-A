@@ -5,15 +5,17 @@
 
 #include "fish_model.h"
 
-#define SIZE 9
-#define X 3
-#define Y 3
+#define WORLD_HEIGHT 200
+#define WORLD_WIDTH 200
+#define X 2
+#define Y 2
 #define POPULATION 2
 #define UP 0
 #define DOWN 1
 #define LEFT 2
 #define RIGHT 3
 
+#define ITERATIONS 100
 
 MPI_Datatype mpi_fish_group;
 void create_fish_group_datatype();
@@ -21,9 +23,13 @@ void create_fish_group_datatype();
 int main(int argc, char** argv)
 {
     int numtasks, worldrank, rank, source, dest, outbuf, i, tag=1;
-    int inbuf[4]={MPI_PROC_NULL, MPI_PROC_NULL, MPI_PROC_NULL, MPI_PROC_NULL};
+    // int inbuf[4]={MPI_PROC_NULL, MPI_PROC_NULL, MPI_PROC_NULL, MPI_PROC_NULL};
     int nbrs[4], coords[2];
     int dims[2], periods[2]={0, 0}, reorder=0;
+
+    int target_coords[2];
+    int cart_coords[2];
+    int target_rank;
 
     dims[0] = X;
     dims[1] = Y;
@@ -36,8 +42,11 @@ int main(int argc, char** argv)
 
     MPI_Comm cartcomm;
 
-    MPI_Request reqs[8];
-    MPI_Status stats[8];
+    MPI_Request recvreqs[POPULATION];
+    MPI_Status recvstats[POPULATION];
+
+    MPI_Request sendreqs[POPULATION];
+    MPI_Status sendstats[POPULATION];
 
     // createDimensions(dims, SIZE);
 
@@ -62,8 +71,8 @@ int main(int argc, char** argv)
 
     if(worldrank == 0){
         // Populate the world
-        printf("World: %dx%d (size:%d)\n", dims[0], dims[1], SIZE);
-        populate(groups, POPULATION, dims[0], dims[1]);
+        printf("World: %dx%d (size:%dx%d)\n", dims[0], dims[1], WORLD_HEIGHT, WORLD_WIDTH);
+        populate(groups, POPULATION, WORLD_WIDTH, WORLD_HEIGHT);
         for(i = 0; i < POPULATION; i++){
             printf("fish: %d, x=%d, y=%d\n", groups[i].num, groups[i].x, groups[i].y);
         }
@@ -74,14 +83,25 @@ int main(int argc, char** argv)
 
     // Each cell has to figure out which fish groups belongs to it
     for(i = 0; i < POPULATION; i++){
-        if(groups[i].x == coords[0] && groups[i].y == coords[1]){
+        int cart_coords[2];
+        get_cart_coords(cart_coords, groups[i], WORLD_WIDTH, WORLD_HEIGHT, dims[0], dims[1]);
+        if(cart_coords[0] == coords[0] && cart_coords[1] == coords[1]){
             // This fish group belongs to this cell
             my_groups[num_fish_in_cell++] = groups[i];
         }
     }
 
+    update(my_groups, num_fish_in_cell);
     for(i = 0; i < num_fish_in_cell; i++){
+        get_cart_coords(cart_coords, groups[i], WORLD_WIDTH, WORLD_HEIGHT, dims[0], dims[1]);
+        MPI_Cart_rank(cartcomm, cart_coords, &target_rank);
         printf("Rank %d has group with %d fish in it\n", rank, my_groups[i].num);
+        printf("fish: %d, x=%d, y=%d\n", my_groups[i].num, my_groups[i].x, my_groups[i].y);
+        if(rank != target_rank){
+            printf("Should be sent to %d\n", target_rank);
+            // MPI_Isend(my_groups[i], 1, mpi_fish_group, target_rank,
+            //     tag, cartcomm, &sendreqs[i])
+        }
     }
 
     printf("rank = %d, coords = %d,%d, having neighbours(u,d,l,r) = %d %d %d %d \n",
