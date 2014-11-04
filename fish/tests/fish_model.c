@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <time.h>
 
 
 void createDimensions(int* arr, int size){
@@ -27,7 +28,7 @@ void createDimensions(int* arr, int size){
 
 void populate(fish_group *grid, int numfish, int max_x, int max_y){
     int max_speed = max_x / 10;
-    int i, n, x, y, sx, sy;
+    int i;
     srand(time(NULL));
     for(i=0; i < numfish; i++){
         grid[i].num = rand() % 100;

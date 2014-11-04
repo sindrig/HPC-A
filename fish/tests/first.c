@@ -113,7 +113,6 @@ int main(int argc, char** argv)
 
 void create_fish_group_datatype(){
     // Set up parameters to create our mpi datatype
-    int nitems = 5;
     int blocklengths[5] = {1, 2, 3, 4, 5};
     MPI_Datatype types[5] = {MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT};
     MPI_Aint offsets[5];

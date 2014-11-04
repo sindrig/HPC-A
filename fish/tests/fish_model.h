@@ -16,4 +16,7 @@ struct fish_group_s {
 
 typedef struct fish_group_s fish_group;
 
+void populate(fish_group *grid, int numfish, int max_x, int max_y);
+void get_cart_coords(int *info, fish_group group, int max_x, int max_y, int num_x, int num_y);
+void update(fish_group *groups, int numfish);
 #endif

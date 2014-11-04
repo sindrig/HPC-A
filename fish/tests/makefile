@@ -1,6 +1,19 @@
+OPT = -02
 
-first : first.c
-	mpicc first.c fish_model.c -o first.o
+CC = mpicc
+CFLAGS = -Wall -std=c99
+LIBS = -lm
+
+test: clean all
+	mpirun -n 4 ./first.o
+
+all: target
+target: first
+
+OBJS = first.c fish_model.c
+
+first : $(OBJS)
+	$(CC) -o first.o $(OBJS) $(OPT) $(LIBS) $(CFLAGS)
 
 clean :
 	rm -rf */*.o */*.o[0-9][0-9][0-9][0-9][0-9]
