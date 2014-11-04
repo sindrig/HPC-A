@@ -78,7 +78,7 @@ int main(int argc, char** argv)
         }
     }
 
-    // Broadcast all fish groups to all cells
+    // Broadcast all fish groups to all cells.
     MPI_Bcast(groups, POPULATION, mpi_fish_group, 0, cartcomm);
 
     // Each cell has to figure out which fish groups belongs to it
@@ -91,7 +91,9 @@ int main(int argc, char** argv)
         }
     }
 
+    // Update the x,y position of every group according to it's movement speed.
     update(my_groups, num_fish_in_cell);
+
     for(i = 0; i < num_fish_in_cell; i++){
         get_cart_coords(cart_coords, groups[i], WORLD_WIDTH, WORLD_HEIGHT, dims[0], dims[1]);
         MPI_Cart_rank(cartcomm, cart_coords, &target_rank);
