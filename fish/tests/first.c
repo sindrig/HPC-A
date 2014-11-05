@@ -178,6 +178,7 @@ int main(int argc, char** argv)
 
         // printf("%d-%d: testdone: %d - probedone: %d - received: %d\n", rank, j, testdone, probedone, count);
 
+        // Update the x,y position of every group according to it's movement speed.
         update(my_groups, num_fish_in_cell);
         // break;
     }
