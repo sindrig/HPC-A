@@ -38,14 +38,14 @@ void populate(fish_group *grid, int numfish, int max_x, int max_y){
     }
 }
 
-int get_new_speed(old_speed){
+int get_new_speed(int old_speed){
     // TODO: Make this somehow more realistic
     int new_speed = old_speed + (rand() % (MAX_SPEED_CHANGE*2+1)) - MAX_SPEED_CHANGE;
     if(new_speed > MAX_SPEED){
-        return MAX_SPEED;
+        return MAX_SPEED - 1;
     }
     if(new_speed < -MAX_SPEED){
-        return -MAX_SPEED;
+        return -MAX_SPEED + 1;
     }
     return new_speed;
 }
@@ -57,6 +57,7 @@ void update(fish_group *groups, int numfish){
     for(i=0; i < numfish; i++){
         groups[i].x += groups[i].x_speed;
         groups[i].y += groups[i].y_speed;
+        groups[i].x_speed = get_new_speed(groups[i].x_speed);
         groups[i].x_speed = get_new_speed(groups[i].x_speed);
         groups[i].y_speed = get_new_speed(groups[i].y_speed);
     }
@@ -85,6 +86,6 @@ void get_cart_coords(int *info, fish_group *group,
 
     info[x] = group->x / (max_x / num_x);
     info[y] = group->y / (max_y / num_y);
-    printf("Returning coords (%d, %d) from (%d, %d) (originally (%d, %d) (speed: (%d, %d)))\n",
-        info[x], info[y], group->x, group->y, org_x, org_y, group->x_speed, group->y_speed);
+    // printf("Returning coords (%d, %d) from (%d, %d) (originally (%d, %d) (speed: (%d, %d)))\n",
+    //     info[x], info[y], group->x, group->y, org_x, org_y, group->x_speed, group->y_speed);
 }

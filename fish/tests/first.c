@@ -117,7 +117,7 @@ int main(int argc, char** argv)
         for(i = 0; i < num_fish_in_cell; i++){
             get_cart_coords(cart_coords, &my_groups[i], WORLD_WIDTH, WORLD_HEIGHT, dims[0], dims[1]);
             MPI_Cart_rank(cartcomm, cart_coords, &target_rank);
-            printf("Rank %d has group with %d fish in it\n", rank, my_groups[i].num);
+            // printf("Rank %d has group with %d fish in it\n", rank, my_groups[i].num);
             // printf("fish: %d, x=%d, y=%d\n", my_groups[i].num, my_groups[i].x, my_groups[i].y);
             if(rank != target_rank){
                 // printf("Should be sent to %d\n", target_rank);
