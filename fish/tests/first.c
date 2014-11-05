@@ -1,9 +1,15 @@
 //mpirun -np 16 ./first.o
+#define _POSIX_C_SOURCE 199309L
 #include <stdio.h>
 #include <mpi.h>
 #include <stddef.h>
+#include <unistd.h>
+#include <string.h>
+#include <time.h>
+#include <sys/time.h>
 
 #include "fish_model.h"
+#include "fish_utils.h"
 
 #define WORLD_HEIGHT 200
 #define WORLD_WIDTH 200
@@ -15,7 +21,7 @@
 #define LEFT 2
 #define RIGHT 3
 
-#define ITERATIONS 100
+#define ITERATIONS 200
 
 MPI_Datatype mpi_fish_group;
 void create_fish_group_datatype();
@@ -42,11 +48,16 @@ int main(int argc, char** argv)
 
     MPI_Comm cartcomm;
 
-    MPI_Request recvreqs[POPULATION];
-    MPI_Status recvstats[POPULATION];
+    // MPI_Request recvreqs[POPULATION];
+    // MPI_Status recvstats[POPULATION];
 
-    MPI_Request sendreqs[POPULATION];
-    MPI_Status sendstats[POPULATION];
+    // MPI_Request sendreqs[POPULATION];
+    // MPI_Status sendstats[POPULATION];
+
+    // We need at least one for each neigbour and additionally maximum
+    // of POPULATION for our sends.
+    // MPI_Request requests[4];
+    // MPI_Status status[4];
 
     // createDimensions(dims, SIZE);
 
@@ -72,40 +83,108 @@ int main(int argc, char** argv)
     if(worldrank == 0){
         // Populate the world
         printf("World: %dx%d (size:%dx%d)\n", dims[0], dims[1], WORLD_HEIGHT, WORLD_WIDTH);
-        populate(groups, POPULATION, WORLD_WIDTH, WORLD_HEIGHT);
+        populate(my_groups, POPULATION, WORLD_WIDTH, WORLD_HEIGHT);
+        num_fish_in_cell = POPULATION;
         for(i = 0; i < POPULATION; i++){
-            printf("fish: %d, x=%d, y=%d\n", groups[i].num, groups[i].x, groups[i].y);
+            printf("fish: %d, x=%d, y=%d\n", my_groups[i].num, my_groups[i].x, my_groups[i].y);
         }
     }
 
-    // Broadcast all fish groups to all cells
-    MPI_Bcast(groups, POPULATION, mpi_fish_group, 0, cartcomm);
+    int j = 0;
 
-    // Each cell has to figure out which fish groups belongs to it
-    for(i = 0; i < POPULATION; i++){
-        int cart_coords[2];
-        get_cart_coords(cart_coords, groups[i], WORLD_WIDTH, WORLD_HEIGHT, dims[0], dims[1]);
-        if(cart_coords[0] == coords[0] && cart_coords[1] == coords[1]){
-            // This fish group belongs to this cell
-            my_groups[num_fish_in_cell++] = groups[i];
+    fish_group received[POPULATION];
+    MPI_Request recv_request;
+
+    MPI_Irecv(received, POPULATION, mpi_fish_group,
+        MPI_ANY_SOURCE, tag, cartcomm, &recv_request);
+    while(j++ < ITERATIONS){
+        int sends = 0;
+        int testdone, probedone;
+
+        MPI_Request requests[numtasks];
+        MPI_Status status[numtasks];
+
+        MPI_Status recv_status, probe_status;
+
+
+        int send_counts[numtasks];
+        for(i = 0; i < numtasks; i++){
+            send_counts[i] = 0;
         }
+
+        fish_group send_objects[numtasks][num_fish_in_cell];
+
+        for(i = 0; i < num_fish_in_cell; i++){
+            get_cart_coords(cart_coords, &my_groups[i], WORLD_WIDTH, WORLD_HEIGHT, dims[0], dims[1]);
+            MPI_Cart_rank(cartcomm, cart_coords, &target_rank);
+            printf("Rank %d has group with %d fish in it\n", rank, my_groups[i].num);
+            // printf("fish: %d, x=%d, y=%d\n", my_groups[i].num, my_groups[i].x, my_groups[i].y);
+            if(rank != target_rank){
+                // printf("Should be sent to %d\n", target_rank);
+                int sc = send_counts[target_rank];
+                send_counts[target_rank] += 1;
+                // printf("send count is %d\n", sc);
+                send_objects[target_rank][sc] = my_groups[i];
+                // MPI_Isend(&my_groups[i], 1, mpi_fish_group, target_rank,
+                //     tag, cartcomm, &requests[sends]);
+                // printf("removing element\n");
+                remove_element(my_groups, i, num_fish_in_cell--);
+                // printf("removing element done\n");
+                i--;
+                // sends++;
+            }
+        }
+
+        for(i = 0; i < numtasks; i++){
+            if(send_counts[i] > 0){
+                printf("Rank %d: Sending %d groups to %d in loop %d\n", rank, send_counts[i], i, j);
+                // MPI_Isend(send_objects[i], send_counts[i], mpi_fish_group,
+                //     i, tag, cartcomm, &requests[sends++]);
+                MPI_Send(send_objects[i], send_counts[i], mpi_fish_group,
+                    i, tag, cartcomm);
+            }
+        }
+        MPI_Barrier(cartcomm);
+        struct timespec tim;
+        tim.tv_sec  = 0;
+        // tim.tv_nsec = 500000000L;
+        tim.tv_nsec = 50000000L;
+        nanosleep(&tim, NULL);
+
+
+        // printf("rank = %d, 4 + num_fish_in_cell,: %d\n", rank, 4 + num_fish_in_cell);
+        if(sends > 0){
+            MPI_Waitall(sends, requests, status);
+        }
+
+
+        MPI_Iprobe(MPI_ANY_SOURCE, tag, cartcomm, &probedone, &probe_status);
+
+        MPI_Test(&recv_request, &testdone, &recv_status);
+
+        int count = 0;
+        while(testdone){
+            MPI_Get_count(&recv_status, mpi_fish_group, &count);
+            for(i = 0; i < count; i++){
+                my_groups[num_fish_in_cell++] =received[i];
+            }
+            MPI_Irecv(received, POPULATION, mpi_fish_group,
+                MPI_ANY_SOURCE, tag, cartcomm, &recv_request);
+
+            MPI_Iprobe(MPI_ANY_SOURCE, tag, cartcomm, &probedone, &probe_status);
+
+            MPI_Test(&recv_request, &testdone, &recv_status);
+        }
+
+        // printf("%d-%d: testdone: %d - probedone: %d - received: %d\n", rank, j, testdone, probedone, count);
+
+        update(my_groups, num_fish_in_cell);
+        // break;
     }
 
-    update(my_groups, num_fish_in_cell);
-    for(i = 0; i < num_fish_in_cell; i++){
-        get_cart_coords(cart_coords, groups[i], WORLD_WIDTH, WORLD_HEIGHT, dims[0], dims[1]);
-        MPI_Cart_rank(cartcomm, cart_coords, &target_rank);
-        printf("Rank %d has group with %d fish in it\n", rank, my_groups[i].num);
-        printf("fish: %d, x=%d, y=%d\n", my_groups[i].num, my_groups[i].x, my_groups[i].y);
-        if(rank != target_rank){
-            printf("Should be sent to %d\n", target_rank);
-            // MPI_Isend(my_groups[i], 1, mpi_fish_group, target_rank,
-            //     tag, cartcomm, &sendreqs[i])
-        }
-    }
 
-    printf("rank = %d, coords = %d,%d, having neighbours(u,d,l,r) = %d %d %d %d \n",
-            rank, coords[0], coords[1], nbrs[UP], nbrs[DOWN], nbrs[LEFT], nbrs[RIGHT]);
+    // printf("rank = %d, coords = %d,%d, having neighbours(u,d,l,r) = %d %d %d %d \n",
+    //         rank, coords[0], coords[1], nbrs[UP], nbrs[DOWN], nbrs[LEFT], nbrs[RIGHT]);
 
     MPI_Finalize();
     return 0;

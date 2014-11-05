@@ -1,4 +1,4 @@
-OPT = -02
+OPT = -O2
 
 CC = mpicc
 CFLAGS = -Wall -std=c99
@@ -10,7 +10,7 @@ test: clean all
 all: target
 target: first
 
-OBJS = first.c fish_model.c
+OBJS = first.c fish_model.c fish_utils.c
 
 first : $(OBJS)
 	$(CC) -o first.o $(OBJS) $(OPT) $(LIBS) $(CFLAGS)
