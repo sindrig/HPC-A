@@ -21,6 +21,8 @@
 #define LEFT 2
 #define RIGHT 3
 
+#define OUTPUT 1
+
 #define ITERATIONS 200
 
 MPI_Datatype mpi_fish_group;
@@ -28,12 +30,11 @@ void create_fish_group_datatype();
 
 int main(int argc, char** argv)
 {
-    int numtasks, worldrank, rank, source, dest, outbuf, i, tag=1;
+    int numtasks, worldrank, rank, i, tag=1;
     // int inbuf[4]={MPI_PROC_NULL, MPI_PROC_NULL, MPI_PROC_NULL, MPI_PROC_NULL};
     int nbrs[4], coords[2];
     int dims[2], periods[2]={0, 0}, reorder=0;
 
-    int target_coords[2];
     int cart_coords[2];
     int target_rank;
 
@@ -42,7 +43,6 @@ int main(int argc, char** argv)
 
     // Two arrays of fish, one for the whole (only used in initialization
     // and the other to hold each process's groups)
-    fish_group groups[POPULATION];
     fish_group my_groups[POPULATION];
     int num_fish_in_cell = 0;
 
@@ -178,9 +178,25 @@ int main(int argc, char** argv)
 
         // printf("%d-%d: testdone: %d - probedone: %d - received: %d\n", rank, j, testdone, probedone, count);
 
+
+        if(OUTPUT){
+            // MPI_Barrier(cartcomm);
+            // if(rank==0){
+            //     printf("--stat\n");
+            // }
+            // MPI_Barrier(cartcomm);
+            for(i=0; i < num_fish_in_cell; i++){
+                printf("--fish-%d-%d-%d\n", my_groups[i].num, my_groups[i].x, my_groups[i].y);
+            }
+            // MPI_Barrier(cartcomm);
+            // if(rank==0){
+            //     printf("--endstat\n");
+            // }
+            // MPI_Barrier(cartcomm);
+        }
+
         // Update the x,y position of every group according to it's movement speed.
         update(my_groups, num_fish_in_cell);
-        // break;
     }
 
 
