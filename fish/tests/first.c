@@ -186,7 +186,7 @@ int main(int argc, char** argv)
             // }
             // MPI_Barrier(cartcomm);
             for(i=0; i < num_fish_in_cell; i++){
-                printf("--fish-%d-%d-%d\n", my_groups[i].num, my_groups[i].x, my_groups[i].y);
+                printf("--fish-%d-%d-%d-%d\n", j, my_groups[i].num, my_groups[i].x, my_groups[i].y);
             }
             // MPI_Barrier(cartcomm);
             // if(rank==0){
