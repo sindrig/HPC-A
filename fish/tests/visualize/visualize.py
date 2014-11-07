@@ -52,10 +52,11 @@ class Parameter(object):
 
 if sys.argv[-1] == 'save':
     data = []
-    with open('../first.c', 'r') as f:
+    with open('first.c', 'r') as f:
         for p in ('POPULATION', 'WORLD_HEIGHT', 'WORLD_WIDTH'):
             param = Parameter(p)
-            data.append(p.get_defined_parameter(f))
+            param.get_defined_parameter(f)
+            data.append(param)
     while 1:
         try:
             line = sys.stdin.readline()
