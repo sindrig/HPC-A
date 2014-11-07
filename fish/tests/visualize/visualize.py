@@ -5,13 +5,13 @@ import sys
 
 
 def print_fish(data):
-    for item in data:
+    for item in data[:10]:
         print item
 
 
 def get_file_scp(username, password):
     # Assumes that the datafile resides at
-    # ~/HPC-A/fish/tests/visualize/output.dat
+    # ~/HPC-A/fish/tests/output.dat
     import paramiko
     import scp
     client = paramiko.SSHClient()
@@ -19,7 +19,7 @@ def get_file_scp(username, password):
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect('jotunn.rhi.hi.is', 22, username, password)
     scp_client = scp.SCPClient(client.get_transport())
-    scp_client.get('~/HPC-A/fish/tests/visualize/output.dat')
+    scp_client.get('~/HPC-A/fish/tests/output.dat')
     with open('output.dat', 'r') as f:
         return pickle.load(f)
 
@@ -34,6 +34,8 @@ class Fish(object):
     def __unicode__(self):
         return '(%d, %d): %d' % (self.x, self.y, self.num)
 
+    __str__ = __unicode__
+
 
 class Parameter(object):
     value = 0
@@ -41,22 +43,24 @@ class Parameter(object):
     def __init__(self, name):
         self.name = name
 
-    def get_defined_parameter(self, f):
-        for line in f:
-            if self.name in line and 'define' in line:
-                self.value = int(line.strip().split()[-1])
+    def get_defined_parameter(self):
+        with open('first.c', 'r') as f:
+            for line in f:
+                if self.name in line and 'define' in line:
+                    self.value = int(line.strip().split()[-1])
 
     def __unicode__(self):
         return '%s = %d' % (self.name, self.value)
 
+    __str__ = __unicode__
+
 
 if sys.argv[-1] == 'save':
     data = []
-    with open('first.c', 'r') as f:
-        for p in ('POPULATION', 'WORLD_HEIGHT', 'WORLD_WIDTH'):
-            param = Parameter(p)
-            param.get_defined_parameter(f)
-            data.append(param)
+    for p in ('POPULATION', 'WORLD_HEIGHT', 'WORLD_WIDTH'):
+        param = Parameter(p)
+        param.get_defined_parameter()
+        data.append(param)
     while 1:
         try:
             line = sys.stdin.readline()
