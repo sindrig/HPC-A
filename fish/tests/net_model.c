@@ -11,9 +11,9 @@ net get_net(int max_x, int max_y){
 }
 
 
-int add_fish_to_net(net net_instance){
-    if(net_instance.fish < MAX_FISH_IN_NET){
-        net_instance.fish += 1;
+int add_fish_to_net(net *net_instance){
+    if(net_instance->fish < MAX_FISH_IN_NET){
+        net_instance->fish += 1;
         return 1;
     }
     return 0;

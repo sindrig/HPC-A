@@ -3,7 +3,7 @@
 
 #define MAX_FISH_IN_NET 100
 #define NETS 2
-#define NET_SIZE 50
+#define NET_SIZE 200
 
 struct net_s {
     // Number of fish in the net
@@ -17,7 +17,7 @@ struct net_s {
 typedef struct net_s net;
 
 net get_net(int max_x, int max_y);
-int add_fish_to_net(net net_instance);
+int add_fish_to_net(net *net_instance);
 
 // void populate(fish_group *grid, int numfish, int max_x, int max_y);
 // void get_cart_coords(int *info, fish_group *group, int max_x, int max_y, int num_x, int num_y);

@@ -78,6 +78,7 @@ int main(int argc, char** argv)
         }
         for(i = 0; i < NETS; i++){
             nets[i] = get_net(WORLD_WIDTH, WORLD_HEIGHT);
+            printf("net: %d, x=%d, y=%d\n", i, nets[i].x, nets[i].y);
         }
     }
 
@@ -108,6 +109,11 @@ int main(int argc, char** argv)
         fish_group send_objects[numtasks][num_fish_in_cell];
 
         for(i = 0; i < num_fish_in_cell; i++){
+            if(my_groups[i].num == 0){
+                remove_element(my_groups, i, num_fish_in_cell--);
+                i--;
+                continue;
+            }
             get_cart_coords(cart_coords, &my_groups[i], WORLD_WIDTH, WORLD_HEIGHT, dims[0], dims[1]);
             MPI_Cart_rank(cartcomm, cart_coords, &target_rank);
             if(rank != target_rank){
@@ -184,29 +190,35 @@ int main(int argc, char** argv)
 
         // printf("Gathering...\n");
 
-        int recvnets = NETS*(numtasks-1);
+        int recvnets = NETS*numtasks;
         net temp_nets[recvnets];
 
         MPI_Gather(nets, NETS, mpi_net, temp_nets, NETS, mpi_net, 0, cartcomm);
 
         // printf("Gather complete\n");
-
+        // sleep(1);
         if(rank == 0){
             int new_catch[NETS];
-            printf("first\n");
+            // printf("first\n");
             for(i=0; i < NETS; i++){
-                new_catch[i] = nets[i].fish - last_catch[i];
-                printf("New catch %d: %d\n", i, new_catch[i]);
-                printf("fish in net: %d, last_catch: %d\n", nets[i].fish, last_catch[i]);
+                new_catch[i] = 0;
+                // printf("New catch %d: %d\n", i, new_catch[i]);
+                // printf("fish in net: %d, last_catch: %d\n", nets[i].fish, last_catch[i]);
             }
-            printf("second\n");
+            // printf("second\n");
             for(i=0; i < recvnets; i++){
+                // printf("i=%d\n", i);
                 int ind = i % NETS;
-                printf("ind: %d\n", ind);
-                new_catch[ind] += temp_nets[i].fish - new_catch[ind];
+                // printf("ind: %d\n", ind);
+                int diff = temp_nets[i].fish - last_catch[ind];
+                // printf("temp_nets[i].fish=%d, last_catch[ind]=%d\n", temp_nets[i].fish, last_catch[ind]);
+                // printf("diff: %d\n", diff);
+                new_catch[ind] += diff;
+                // printf("---------------\n");
             }
-            printf("third\n");
+            // printf("third\n");
             for(i=0; i < NETS; i++){
+                // printf("new_catch for %d: %d\n", i, new_catch[i]);
                 nets[i].fish += new_catch[i];
             }
             printf("fourth\n");
@@ -215,14 +227,8 @@ int main(int argc, char** argv)
                 printf("Net %d has %d fish\n", i, nets[i].fish);
             }
         }
-        if(rank == 0){
-            printf("Broadcasting...\n");
-        }
 
         MPI_Bcast(nets, NETS, mpi_net, 0, cartcomm);
-        if(rank == 0){
-            printf("Broadcast done\n");
-        }
     }
 
     MPI_Finalize();
@@ -246,7 +252,7 @@ void create_mpi_datatypes(){
     MPI_Type_commit(&mpi_fish_group);
 
     // Set up parameters to create our net mpi datatype
-    int blocklengths2[3] = {1, 2, 3};
+    int blocklengths2[3] = {1, 1, 1};
     MPI_Datatype types2[3] = {MPI_INT, MPI_INT, MPI_INT};
     MPI_Aint offsets2[3];
 
