@@ -170,6 +170,9 @@ int main(int argc, char** argv)
             for(i=0; i < num_fish_in_cell; i++){
                 printf("--fish-%d-%d-%d-%d-%d\n", j, my_groups[i].num, my_groups[i].x, my_groups[i].y, rank);
             }
+            for(i=0; i < NETS; i++){
+                printf("--net-%d-%d-%d-%d-%d-%d\n", j, i, nets[i].fish, NET_SIZE, nets[i].x, nets[i].y);
+            }
             // MPI_Barrier(cartcomm);
             // if(rank==0){
             //     printf("--endstat\n");
