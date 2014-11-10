@@ -48,8 +48,13 @@ def print_fish(data):
                 # textcoords='offset points'
             )
         for net in nets.get(fish.iteration, []):
-            circle = plt.Circle((net.x, net.y), net.size, color='r')
+            circle = plt.Circle(
+                (net.x, net.y), net.size, color='r', fill=False)
             fig.gca().add_artist(circle)
+            ax.annotate(
+                '%d' % net.fish,
+                xy=(net.x, net.y)
+            )
         # buf = io.BytesIO()
         canvas = plt.get_current_fig_manager().canvas
         canvas.draw()
@@ -68,14 +73,12 @@ def print_fish(data):
         if fish.iteration > last_iter and collection:
             imgs.append(get_img(collection))
             collection = []
-            if fish.iteration > 5:
-                break
         collection.append(fish)
         last_iter = fish.iteration
     if collection:
         imgs.append(get_img(collection))
 
-    writeGif('visualisation.gif', imgs)
+    writeGif('visualisation.gif', imgs, duration=0.2)
 
 
 def get_file_scp(username, password):
