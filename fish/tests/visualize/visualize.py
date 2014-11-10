@@ -16,17 +16,30 @@ def print_fish(data):
         (x.name, x.value) for x in data if isinstance(x, Parameter)
     )
 
+    colors = [[]] * len(set(x.rank for x in fishes))
+    avail_colors = ['r', 'g', 'b', 'y']
+    for i in range(len(colors)):
+        colors[i] = avail_colors[i]
+
     imgs = []
 
     def get_img(coll):
         # import io
-        points = [(fish.x, fish.y) for fish in coll]
-        plt.figure()
+        # points = [(fish.x, fish.y) for fish in coll]
+        fig = plt.figure()
         plt.xlim([0, settings['WORLD_WIDTH']])
         plt.ylim([0, settings['WORLD_HEIGHT']])
-        x, y = zip(*points)
-        plt.plot(x, y, 'o')
-
+        # x, y = zip(*points)
+        # plt.plot(x, y, 'o')
+        # plt.set_color_cycle()
+        ax = fig.add_subplot(111)
+        for fish in coll:
+            plt.plot([fish.x], [fish.y], '%so' % colors[fish.rank])
+            ax.annotate(
+                '%d' % fish.num,
+                xy=(fish.x, fish.y),
+                # textcoords='offset points'
+            )
         # buf = io.BytesIO()
         canvas = plt.get_current_fig_manager().canvas
         canvas.draw()
@@ -50,7 +63,7 @@ def print_fish(data):
     if collection:
         imgs.append(get_img(collection))
 
-    writeGif('visualisation.gif', imgs)
+    writeGif('visualisation.gif', imgs, duration=0.3)
 
 
 def get_file_scp(username, password):
