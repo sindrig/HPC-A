@@ -1,9 +1,9 @@
 #ifndef __NET_MODEL__
 #define __NET_MODEL__
 
-#define MAX_FISH_IN_NET 100
+#define MAX_FISH_IN_NET 200
 #define NETS 2
-#define NET_SIZE 200
+#define NET_SIZE 40
 
 struct net_s {
     // Number of fish in the net
