@@ -15,18 +15,41 @@ def print_fish(data):
     settings = dict(
         (x.name, x.value) for x in data if isinstance(x, Parameter)
     )
-
+    nets_lst = sorted(
+        [item for item in data if isinstance(item, Net)],
+        key=lambda x: (x.iteration, x._id)
+    )
+    nets = {}
+    for nt in nets_lst:
+        if not nt.iteration in nets:
+            nets[nt.iteration] = []
+        nets[nt.iteration].append(nt)
+    colors = [[]] * len(set(x.rank for x in fishes))
+    avail_colors = ['r', 'g', 'b', 'y']
+    for i in range(len(colors)):
+        colors[i] = avail_colors[i]
     imgs = []
 
     def get_img(coll):
         # import io
-        points = [(fish.x, fish.y) for fish in coll]
-        plt.figure()
+        # points = [(fish.x, fish.y) for fish in coll]
+        fig = plt.figure()
         plt.xlim([0, settings['WORLD_WIDTH']])
         plt.ylim([0, settings['WORLD_HEIGHT']])
-        x, y = zip(*points)
-        plt.plot(x, y, 'o')
-
+        # x, y = zip(*points)
+        # plt.plot(x, y, 'o')
+        # plt.set_color_cycle()
+        ax = fig.add_subplot(111)
+        for fish in coll:
+            plt.plot([fish.x], [fish.y], '%so' % colors[fish.rank])
+            ax.annotate(
+                '%d' % fish.num,
+                xy=(fish.x, fish.y),
+                # textcoords='offset points'
+            )
+        for net in nets.get(fish.iteration, []):
+            circle = plt.Circle((net.x, net.y), net.size, color='r')
+            fig.gca().add_artist(circle)
         # buf = io.BytesIO()
         canvas = plt.get_current_fig_manager().canvas
         canvas.draw()
@@ -45,6 +68,8 @@ def print_fish(data):
         if fish.iteration > last_iter and collection:
             imgs.append(get_img(collection))
             collection = []
+            if fish.iteration > 5:
+                break
         collection.append(fish)
         last_iter = fish.iteration
     if collection:
@@ -136,7 +161,7 @@ if sys.argv[-1] == 'save':
             print line.strip()
     with open('output.dat', 'w') as f:
         pickle.dump(data, f)
-elif len(sys.argv) == 2 and sys.argv[1] == 'gif':
+elif len(sys.argv) == 3 and sys.argv[1] == 'gif':
     with open(sys.argv[-1], 'r') as f:
         print_fish(pickle.load(f))
 elif len(sys.argv) == 4 and sys.argv[1] == 'gif':
