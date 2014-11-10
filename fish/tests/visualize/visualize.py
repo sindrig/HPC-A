@@ -120,6 +120,8 @@ if sys.argv[-1] == 'save':
             if parttype == 'fish':
                 iteration, num, x, y, rank = (int(k) for k in parts[1:])
                 data.append(Fish(iteration, num, x, y, rank))
+        else:
+            print line.strip()
     with open('output.dat', 'w') as f:
         pickle.dump(data, f)
 elif len(sys.argv) == 2 and sys.argv[1] == 'gif':

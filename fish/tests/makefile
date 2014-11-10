@@ -10,10 +10,10 @@ test: clean all
 all: target
 target: first
 
-OBJS = first.c fish_model.c fish_utils.c
+OBJS = first.c fish_model.c fish_utils.c net_model.c
 
 first : $(OBJS)
 	$(CC) -o first.o $(OBJS) $(OPT) $(LIBS) $(CFLAGS)
 
 clean :
-	rm -rf */*.o */*.o[0-9][0-9][0-9][0-9][0-9]
+	rm -rf *.o *.o[0-9][0-9][0-9][0-9][0-9]

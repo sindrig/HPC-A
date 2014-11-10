@@ -10,13 +10,14 @@
 #include <sys/time.h>
 
 #include "fish_model.h"
+#include "net_model.h"
 #include "fish_utils.h"
 
 #define WORLD_HEIGHT 200
 #define WORLD_WIDTH 200
 #define X 2
 #define Y 2
-#define POPULATION 2
+#define POPULATION 8
 #define UP 0
 #define DOWN 1
 #define LEFT 2
@@ -27,7 +28,8 @@
 #define ITERATIONS 200
 
 MPI_Datatype mpi_fish_group;
-void create_fish_group_datatype();
+MPI_Datatype mpi_net;
+void create_mpi_datatypes();
 
 int main(int argc, char** argv)
 {
@@ -47,13 +49,15 @@ int main(int argc, char** argv)
     fish_group my_groups[POPULATION];
     int num_fish_in_cell = 0;
 
+    net nets[NETS];
+
     MPI_Comm cartcomm;
 
     // createDimensions(dims, SIZE);
 
     MPI_Init(&argc, &argv);
 
-    create_fish_group_datatype();
+    create_mpi_datatypes();
 
     // Get rank and size of the world
     MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
@@ -64,7 +68,7 @@ int main(int argc, char** argv)
 
     MPI_Cart_coords(cartcomm, rank, 2, coords);
 
-    if(worldrank == 0){
+    if(rank == 0){
         // Populate the world
         printf("World: %dx%d (size:%dx%d)\n", dims[0], dims[1], WORLD_HEIGHT, WORLD_WIDTH);
         populate(my_groups, POPULATION, WORLD_WIDTH, WORLD_HEIGHT);
@@ -72,7 +76,12 @@ int main(int argc, char** argv)
         for(i = 0; i < POPULATION; i++){
             printf("fish: %d, x=%d, y=%d\n", my_groups[i].num, my_groups[i].x, my_groups[i].y);
         }
+        for(i = 0; i < NETS; i++){
+            nets[i] = get_net(WORLD_WIDTH, WORLD_HEIGHT);
+        }
     }
+
+    MPI_Bcast(nets, NETS, mpi_net, 0, cartcomm);
 
     int j = 0;
 
@@ -146,7 +155,6 @@ int main(int argc, char** argv)
 
         // printf("%d-%d: testdone: %d - probedone: %d - received: %d\n", rank, j, testdone, probedone, count);
 
-
         if(OUTPUT){
             // MPI_Barrier(cartcomm);
             // if(rank==0){
@@ -163,16 +171,66 @@ int main(int argc, char** argv)
             // MPI_Barrier(cartcomm);
         }
 
+        int last_catch[NETS];
+        if(rank == 0){
+            for(i=0; i < NETS; i++){
+                last_catch[i] = nets[i].fish;
+            }
+        }
+
         // Update the x,y position of every group according to it's movement speed.
-        update(my_groups, num_fish_in_cell);
+        update(my_groups, num_fish_in_cell, nets, NETS);
+
+
+        // printf("Gathering...\n");
+
+        int recvnets = NETS*(numtasks-1);
+        net temp_nets[recvnets];
+
+        MPI_Gather(nets, NETS, mpi_net, temp_nets, NETS, mpi_net, 0, cartcomm);
+
+        // printf("Gather complete\n");
+
+        if(rank == 0){
+            int new_catch[NETS];
+            printf("first\n");
+            for(i=0; i < NETS; i++){
+                new_catch[i] = nets[i].fish - last_catch[i];
+                printf("New catch %d: %d\n", i, new_catch[i]);
+                printf("fish in net: %d, last_catch: %d\n", nets[i].fish, last_catch[i]);
+            }
+            printf("second\n");
+            for(i=0; i < recvnets; i++){
+                int ind = i % NETS;
+                printf("ind: %d\n", ind);
+                new_catch[ind] += temp_nets[i].fish - new_catch[ind];
+            }
+            printf("third\n");
+            for(i=0; i < NETS; i++){
+                nets[i].fish += new_catch[i];
+            }
+            printf("fourth\n");
+            for(i=0; i < NETS; i++){
+                printf("Catch for %d was %d\n", i, new_catch[i]);
+                printf("Net %d has %d fish\n", i, nets[i].fish);
+            }
+        }
+        if(rank == 0){
+            printf("Broadcasting...\n");
+        }
+
+        MPI_Bcast(nets, NETS, mpi_net, 0, cartcomm);
+        if(rank == 0){
+            printf("Broadcast done\n");
+        }
     }
 
     MPI_Finalize();
     return 0;
 }
 
-void create_fish_group_datatype(){
-    // Set up parameters to create our mpi datatype
+void create_mpi_datatypes(){
+    // Set up parameters to create our fish mpi datatype
     int blocklengths[5] = {1, 2, 3, 4, 5};
     MPI_Datatype types[5] = {MPI_INT, MPI_INT, MPI_INT, MPI_INT, MPI_INT};
     MPI_Aint offsets[5];
@@ -186,4 +244,17 @@ void create_fish_group_datatype(){
     // Create our mpi datatype
     MPI_Type_create_struct(5, blocklengths, offsets, types, &mpi_fish_group);
     MPI_Type_commit(&mpi_fish_group);
+
+    // Set up parameters to create our net mpi datatype
+    int blocklengths2[3] = {1, 2, 3};
+    MPI_Datatype types2[3] = {MPI_INT, MPI_INT, MPI_INT};
+    MPI_Aint offsets2[3];
+
+    offsets2[0] = offsetof(net, fish);
+    offsets2[1] = offsetof(net, x);
+    offsets2[2] = offsetof(net, y);
+
+    // Create our mpi datatype
+    MPI_Type_create_struct(3, blocklengths2, offsets2, types2, &mpi_net);
+    MPI_Type_commit(&mpi_net);
 }
