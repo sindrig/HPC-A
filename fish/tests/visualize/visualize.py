@@ -69,11 +69,12 @@ def get_file_scp(username, password):
 
 
 class Fish(object):
-    def __init__(self, iteration, num, x, y):
+    def __init__(self, iteration, num, x, y, rank):
         self.iteration = iteration
         self.num = num
         self.x = x
         self.y = y
+        self.rank = rank
 
     def __unicode__(self):
         return '%d: (%d, %d): %d' % (self.iteration, self.x, self.y, self.num)
@@ -117,8 +118,8 @@ if sys.argv[-1] == 'save':
             parts = line.split('-')
             parttype = parts[0]
             if parttype == 'fish':
-                iteration, num, x, y = (int(k) for k in parts[1:])
-                data.append(Fish(iteration, num, x, y))
+                iteration, num, x, y, rank = (int(k) for k in parts[1:])
+                data.append(Fish(iteration, num, x, y, rank))
     with open('output.dat', 'w') as f:
         pickle.dump(data, f)
 elif len(sys.argv) == 2 and sys.argv[1] == 'gif':
