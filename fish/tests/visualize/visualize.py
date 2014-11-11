@@ -24,8 +24,13 @@ def print_fish(data):
         if not nt.iteration in nets:
             nets[nt.iteration] = []
         nets[nt.iteration].append(nt)
-    colors = [[]] * len(set(x.rank for x in fishes))
-    avail_colors = ['r', 'g', 'b', 'y']
+    num_procs = len(set(x.rank for x in fishes))
+
+    # We assume that the grid is nxn
+    num_x = num_y = num_procs**(0.5)
+
+    colors = [[]] * num_procs
+    avail_colors = ['r', 'g', 'b', 'y', 'g', 'b', 'y', 'r']
     for i in range(len(colors)):
         colors[i] = avail_colors[i]
     imgs = []
@@ -34,11 +39,10 @@ def print_fish(data):
         # import io
         # points = [(fish.x, fish.y) for fish in coll]
         fig = plt.figure()
-        plt.xlim([0, settings['WORLD_WIDTH']])
-        plt.ylim([0, settings['WORLD_HEIGHT']])
-        # x, y = zip(*points)
-        # plt.plot(x, y, 'o')
-        # plt.set_color_cycle()
+        x_size = settings['WORLD_WIDTH']
+        y_size = settings['WORLD_HEIGHT']
+        plt.xlim([0, x_size])
+        plt.ylim([0, y_size])
         ax = fig.add_subplot(111)
         for fish in coll:
             plt.plot([fish.x], [fish.y], '%so' % colors[fish.rank])
@@ -55,6 +59,14 @@ def print_fish(data):
                 '%d' % net.fish,
                 xy=(net.x, net.y)
             )
+        x_pos = x_size / num_x
+        y_pos = y_size / num_y
+        while x_pos < x_size:
+            plt.plot([x_pos, x_pos], [0, y_size], 'k')
+            x_pos += x_size / num_x
+        while y_pos < x_size:
+            plt.plot([0, x_size], [y_pos, y_pos], 'k')
+            y_pos += y_size / num_y
         # buf = io.BytesIO()
         canvas = plt.get_current_fig_manager().canvas
         canvas.draw()
