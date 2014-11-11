@@ -17,7 +17,7 @@
 #define WORLD_WIDTH 200
 #define X 2
 #define Y 2
-#define POPULATION 8
+#define POPULATION 10
 #define UP 0
 #define DOWN 1
 #define LEFT 2
@@ -127,7 +127,7 @@ int main(int argc, char** argv)
 
         for(i = 0; i < numtasks; i++){
             if(send_counts[i] > 0){
-                printf("Rank %d: Sending %d groups to %d in loop %d\n", rank, send_counts[i], i, j);
+                // printf("Rank %d: Sending %d groups to %d in loop %d\n", rank, send_counts[i], i, j);
                 MPI_Isend(send_objects[i], send_counts[i], mpi_fish_group,
                     i, tag, cartcomm, &requests[sends++]);
                 // MPI_Send(send_objects[i], send_counts[i], mpi_fish_group,
@@ -159,25 +159,13 @@ int main(int argc, char** argv)
             MPI_Test(&recv_request, &testdone, &recv_status);
         }
 
-        // printf("%d-%d: testdone: %d - probedone: %d - received: %d\n", rank, j, testdone, probedone, count);
-
         if(OUTPUT){
-            // MPI_Barrier(cartcomm);
-            // if(rank==0){
-            //     printf("--stat\n");
-            // }
-            // MPI_Barrier(cartcomm);
             for(i=0; i < num_fish_in_cell; i++){
                 printf("--fish-%d-%d-%d-%d-%d\n", j, my_groups[i].num, my_groups[i].x, my_groups[i].y, rank);
             }
             for(i=0; i < NETS; i++){
                 printf("--net-%d-%d-%d-%d-%d-%d\n", j, i, nets[i].fish, NET_SIZE, nets[i].x, nets[i].y);
             }
-            // MPI_Barrier(cartcomm);
-            // if(rank==0){
-            //     printf("--endstat\n");
-            // }
-            // MPI_Barrier(cartcomm);
         }
 
         int last_catch[NETS];
@@ -191,43 +179,23 @@ int main(int argc, char** argv)
         update(my_groups, num_fish_in_cell, nets, NETS);
 
 
-        // printf("Gathering...\n");
-
         int recvnets = NETS*numtasks;
         net temp_nets[recvnets];
 
         MPI_Gather(nets, NETS, mpi_net, temp_nets, NETS, mpi_net, 0, cartcomm);
 
-        // printf("Gather complete\n");
-        // sleep(1);
         if(rank == 0){
             int new_catch[NETS];
-            // printf("first\n");
             for(i=0; i < NETS; i++){
                 new_catch[i] = 0;
-                // printf("New catch %d: %d\n", i, new_catch[i]);
-                // printf("fish in net: %d, last_catch: %d\n", nets[i].fish, last_catch[i]);
             }
-            // printf("second\n");
             for(i=0; i < recvnets; i++){
-                // printf("i=%d\n", i);
                 int ind = i % NETS;
-                // printf("ind: %d\n", ind);
                 int diff = temp_nets[i].fish - last_catch[ind];
-                // printf("temp_nets[i].fish=%d, last_catch[ind]=%d\n", temp_nets[i].fish, last_catch[ind]);
-                // printf("diff: %d\n", diff);
                 new_catch[ind] += diff;
-                // printf("---------------\n");
             }
-            // printf("third\n");
             for(i=0; i < NETS; i++){
-                // printf("new_catch for %d: %d\n", i, new_catch[i]);
                 nets[i].fish += new_catch[i];
-            }
-            printf("fourth\n");
-            for(i=0; i < NETS; i++){
-                printf("Catch for %d was %d\n", i, new_catch[i]);
-                printf("Net %d has %d fish\n", i, nets[i].fish);
             }
         }
 

@@ -25,7 +25,7 @@ void update(fish_group *groups, int numfish, net *nets, int numnets){
     for(i=0; i < numfish; i++){
         for(j=0; j < NETS; j++){
             if(is_inside(groups[i], nets[j])){
-                printf("Group is inside (%d,%d) E (%d,%d)\n", groups[i].x, groups[i].y, nets[j].x, nets[j].y);
+                // printf("Group is inside (%d,%d) E (%d,%d)\n", groups[i].x, groups[i].y, nets[j].x, nets[j].y);
                 if(add_fish_to_net(&nets[j])){
                     groups[i].num -= 1;
                 }
