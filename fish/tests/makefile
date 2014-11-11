@@ -5,7 +5,7 @@ CFLAGS = -Wall -std=c99
 LIBS = -lm
 
 test: clean all
-	mpirun -n 4 ./first.o
+	mpirun -n 9 ./first.o
 
 all: target
 target: first

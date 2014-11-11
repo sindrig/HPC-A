@@ -13,10 +13,10 @@
 #include "net_model.h"
 #include "fish_utils.h"
 
-#define WORLD_HEIGHT 200
-#define WORLD_WIDTH 200
-#define X 2
-#define Y 2
+#define WORLD_HEIGHT 300
+#define WORLD_WIDTH 300
+#define X 3
+#define Y 3
 #define POPULATION 10
 #define UP 0
 #define DOWN 1
@@ -25,7 +25,7 @@
 
 #define OUTPUT 1
 
-#define ITERATIONS 200
+#define ITERATIONS 350
 
 MPI_Datatype mpi_fish_group;
 MPI_Datatype mpi_net;
