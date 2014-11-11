@@ -193,8 +193,17 @@ if sys.argv[-1] == 'save':
             parts = line.split('-')
             parttype = parts[0]
             if parttype == 'fish':
-                iteration, num, x, y, rank = (int(k or '0') for k in parts[1:])
-                data.append(Fish(iteration, num, x, y, rank))
+                try:
+                    iteration, num, x, y, rank = (
+                        int(k or '0') for k in parts[1:]
+                    )
+                except:
+                    print 'Error with line!'
+                    print '========================================='
+                    print line
+                    print '========================================='
+                else:
+                    data.append(Fish(iteration, num, x, y, rank))
             elif parttype == 'net':
                 args = (int(k) for k in parts[1:])
                 data.append(Net(*args))
