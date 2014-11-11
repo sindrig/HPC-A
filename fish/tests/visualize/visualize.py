@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import pickle
 import sys
+import random
 
 
 def print_fish(data):
@@ -30,9 +31,17 @@ def print_fish(data):
     num_x = num_y = num_procs**(0.5)
 
     colors = [[]] * num_procs
-    avail_colors = ['r', 'g', 'b', 'y', 'g', 'b', 'y', 'r']
+    avail_colors = [
+        '#c90707', '#fcfaf2', '#a700b3', '#0dc4e0', '#ff9305', '#520b6b',
+        '#fcce1c', '#ffdc08', '#f5f5dc', '#75ad3e', '#03c6ff', '#751ec3',
+        '#9b8c75', '#f7f6ee', '#c9c9ff', '#b6fcd5', '#660066', '#ffdb00',
+        '#d01265', '#dc322f', '#2aa198', '#000000', '#00dd2f', '#d9d7d7',
+        '#2f2f2f', '#7fffd4', '#0edbec', '#00ff7f', '#00ced1', '#faebd7',
+        '#ff4040'
+    ]
     for i in range(len(colors)):
-        colors[i] = avail_colors[i]
+        colors[i] = random.choice(avail_colors)
+        avail_colors.remove(colors[i])
     imgs = []
 
     def get_img(coll):
@@ -43,14 +52,23 @@ def print_fish(data):
         y_size = settings['WORLD_HEIGHT']
         plt.xlim([0, x_size])
         plt.ylim([0, y_size])
+        mainplt = fig.add_subplot(111)
         ax = fig.add_subplot(111)
-        for fish in coll:
-            plt.plot([fish.x], [fish.y], '%so' % colors[fish.rank])
+        total_fish = 0
+        for fish in sorted(coll, key=lambda x: -x.num):
+            mainplt.plot(
+                [fish.x],
+                [fish.y],
+                'o',
+                color=colors[fish.rank],
+                label='%d' % fish.num
+            )
             ax.annotate(
                 '%d' % fish.num,
                 xy=(fish.x, fish.y),
                 # textcoords='offset points'
             )
+            total_fish += fish.num
         for net in nets.get(fish.iteration, []):
             circle = plt.Circle(
                 (net.x, net.y), net.size, color='r', fill=False)
@@ -59,14 +77,22 @@ def print_fish(data):
                 '%d' % net.fish,
                 xy=(net.x, net.y)
             )
+
+        plt.title('Iteration: %d - #Fish: %d' % (fish.iteration, total_fish))
+
         x_pos = x_size / num_x
         y_pos = y_size / num_y
         while x_pos < x_size:
-            plt.plot([x_pos, x_pos], [0, y_size], 'k')
+            ax.plot([x_pos, x_pos], [0, y_size], 'k')
             x_pos += x_size / num_x
         while y_pos < x_size:
-            plt.plot([0, x_size], [y_pos, y_pos], 'k')
+            ax.plot([0, x_size], [y_pos, y_pos], 'k')
             y_pos += y_size / num_y
+
+        box = mainplt.get_position()
+        mainplt.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+        mainplt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+
         # buf = io.BytesIO()
         canvas = plt.get_current_fig_manager().canvas
         canvas.draw()
