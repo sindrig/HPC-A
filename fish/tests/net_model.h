@@ -1,7 +1,7 @@
 #ifndef __NET_MODEL__
 #define __NET_MODEL__
 
-#define MAX_FISH_IN_NET 50
+#define MAX_FISH_IN_NET 200
 #define NETS 2
 #define NET_SIZE 40
 

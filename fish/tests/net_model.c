@@ -5,8 +5,8 @@
 net get_net(int max_x, int max_y){
     net res;
     res.fish = 0;
-    res.x = rand() % max_x;
-    res.y = rand() % max_y;
+    res.x = rand() % (max_x - NET_SIZE * 2) + NET_SIZE;
+    res.y = rand() % (max_y - NET_SIZE * 2) + NET_SIZE;
     return res;
 }
 
