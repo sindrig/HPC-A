@@ -1,4 +1,5 @@
 #include "fish_model.h"
+#include "net_model.h"
 
 #include <stdlib.h>
 #include <math.h>
@@ -28,7 +29,6 @@ void createDimensions(int* arr, int size){
 
 void populate(fish_group *grid, int numfish, int max_x, int max_y){
     int i;
-    srand(time(NULL));
     for(i=0; i < numfish; i++){
         grid[i].num = rand() % 100;
         grid[i].x = rand() % max_x;
@@ -48,19 +48,6 @@ int get_new_speed(int old_speed){
         return -MAX_SPEED + 1;
     }
     return new_speed;
-}
-
-void update(fish_group *groups, int numfish){
-    // TODO: Change x_speed and y_speed
-    int i;
-    srand(time(NULL));
-    for(i=0; i < numfish; i++){
-        groups[i].x += groups[i].x_speed;
-        groups[i].y += groups[i].y_speed;
-        groups[i].x_speed = get_new_speed(groups[i].x_speed);
-        groups[i].x_speed = get_new_speed(groups[i].x_speed);
-        groups[i].y_speed = get_new_speed(groups[i].y_speed);
-    }
 }
 
 
